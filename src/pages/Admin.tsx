@@ -1,7 +1,9 @@
-import AdminForm, { type NewImage } from "../components/AdminForm";
+import AdminForm from "../components/AdminForm";
+import type { ImageItem } from "../types/ImageItem"
+
 
 type AdminProps = {
-    onAddImage: (image: NewImage) => void;
+    onAddImage: (image: ImageItem) => void;
 };
 
 function Admin({ onAddImage }: AdminProps) {

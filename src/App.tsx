@@ -1,24 +1,44 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import "./App.css";
-import { images as initialImages } from "./data/images";
 import Admin from "./pages/Admin";
-import type { NewImage } from "./components/AdminForm";
 import type { ImageItem } from "./types/ImageItem";
 
 type Page = "gallery" | "admin";
 
 function App() {
   const [page, setPage] = useState<Page>("gallery");
-  const [images, setImages] = useState<ImageItem[]>(initialImages);
+  const [images, setImages] = useState<ImageItem[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedImage, setSelectedImage] = useState<ImageItem | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState("");
 
-  function handleAddImage(newImage: NewImage) {
-    const image: ImageItem = {
-      id: crypto.randomUUID(),
-      ...newImage,
-    };
+  useEffect(() => {
+    async function loadImages() {
+      try {
+        setIsLoading(true);
+        setError("");
 
+        const response = await fetch("http://localhost:7071/api/images");
+
+        if (!response.ok) {
+          throw new Error(`Request failed with status ${response.status}`);
+        }
+
+        const data = (await response.json()) as ImageItem[];
+        setImages(data);
+      } catch (error) {
+        console.error(error);
+        setError("Unable to load images.");
+      } finally {
+        setIsLoading(false);
+      }
+    }
+
+    void loadImages();
+  }, []);
+
+  function handleAddImage(image: ImageItem) {
     setImages((currentImages) => [image, ...currentImages]);
     setPage("gallery");
   }
@@ -31,13 +51,7 @@ function App() {
     }
 
     return images.filter((image) => {
-      const searchableText = [
-        image.title,
-        image.description,
-        ...image.tags,
-      ]
-        .join(" ")
-        .toLowerCase();
+      const searchableText = [image.title, image.description, image.category, ...image.tags,].join(" ").toLowerCase();
 
       return searchableText.includes(search);
     });
@@ -69,42 +83,48 @@ function App() {
         <>
           <header className="page-header">
             <h1>Image Catalogue</h1>
-            <p>Search and browse uploaded images.</p>
+            <p>Search uploaded images.</p>
 
             <input
               className="search-input"
               type="search"
-              placeholder="Search BMW, blue, sedan..."
+              placeholder="Search"
               value={searchTerm}
               onChange={(event) => setSearchTerm(event.target.value)}
             />
           </header>
 
-          <section className="gallery">
-            {filteredImages.map((image) => (
-              <button
-                className="image-card"
-                key={image.id}
-                type="button"
-                onClick={() => setSelectedImage(image)}
-              >
-                <img src={image.imageURL} alt={image.title} />
+          {isLoading && <p className="empty-message">Loading images...</p>}
 
-                <div className="image-card-content">
-                  <h2>{image.title}</h2>
-                  <p>{image.description}</p>
+          {error && <p className="error-message">{error}</p>}
 
-                  <div className="tag-list">
-                    {image.tags.map((tag) => (
-                      <span key={`${image.id}-${tag}`}>{tag}</span>
-                    ))}
+          {!isLoading && !error && (
+            <section className="gallery">
+              {filteredImages.map((image) => (
+                <button
+                  className="image-card"
+                  key={image.id}
+                  type="button"
+                  onClick={() => setSelectedImage(image)}
+                >
+                  <img src={image.imageURL} alt={image.title} />
+
+                  <div className="image-card-content">
+                    <h2>{image.title}</h2>
+                    <p>{image.description}</p>
+
+                    <div className="tag-list">
+                      {image.tags.map((tag) => (
+                        <span key={`${image.id}-${tag}`}>{tag}</span>
+                      ))}
+                    </div>
                   </div>
-                </div>
-              </button>
-            ))}
-          </section>
+                </button>
+              ))}
+            </section>
+          )}
 
-          {filteredImages.length === 0 && (
+          {!isLoading && !error && filteredImages.length === 0 && (
             <p className="empty-message">No matching images found.</p>
           )}
         </>
