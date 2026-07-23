@@ -61,15 +61,40 @@ function AdminForm({ onAddImage }: AdminFormProps) {
         }
     }
 
-    function handleDrop(event: DragEvent<HTMLDivElement>) {
-        event.preventDefault();
+    function handleDragEnter(event: DragEvent<HTMLDivElement>) {
+      event.preventDefault();
+      event.stopPropagation();
+      setIsDragging(true);
+    }
+
+    function handleDragOver(event: DragEvent<HTMLDivElement>) {
+      event.preventDefault();
+      event.stopPropagation();
+      event.dataTransfer.dropEffect = "copy";
+      setIsDragging(true);
+    }
+
+    function handleDragLeave(event: DragEvent<HTMLDivElement>) {
+      event.preventDefault();
+      event.stopPropagation();
+
+      const nextElement = event.relatedTarget as Node | null;
+
+      if (!nextElement || !event.currentTarget.contains(nextElement)) {
         setIsDragging(false);
+      }
+    }
 
-        const file = event.dataTransfer.files?.[0];
+    function handleDrop(event: DragEvent<HTMLDivElement>) {
+      event.preventDefault();
+      event.stopPropagation();
+      setIsDragging(false);
 
-        if(file) {
-            validateAndSelectFile
-        }
+      const file = event.dataTransfer.files?.[0];
+
+      if (file) {
+        validateAndSelectFile(file);
+      }
     }
 
     async function handleSubmit(event: FormEvent<HTMLFormElement>) {
@@ -185,12 +210,9 @@ function AdminForm({ onAddImage }: AdminFormProps) {
 
       <div
         className={`upload-area ${isDragging ? "dragging" : ""}`}
-        onDragEnter={(event) => {
-          event.preventDefault();
-          setIsDragging(true);
-        }}
-        onDragOver={(event) => event.preventDefault()}
-        onDragLeave={() => setIsDragging(false)}
+        onDragEnter={handleDragEnter}
+        onDragOver={handleDragOver}
+        onDragLeave={handleDragLeave}
         onDrop={handleDrop}
       >
         <p>Drag an image here or choose a file.</p>
