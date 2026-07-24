@@ -198,7 +198,6 @@ useEffect(() => {
       ) : (
         <>
           <header className="page-header">
-            <h1>Image Catalogue</h1>
             <p>Search uploaded images.</p>
 
             <input
