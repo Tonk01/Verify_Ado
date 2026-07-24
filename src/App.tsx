@@ -22,28 +22,36 @@ function App() {
 
   const isAdmin = user?.userRoles.includes("admin") ?? false;
 
-  useEffect(() => {
-    async function loadUser() {
-      try {
-        const response = await fetch("/.auth/me");
+useEffect(() => {
+  async function loadUser() {
+    try {
+      const response = await fetch("/.auth/me", {
+        method: "GET",
+        credentials: "include",
+        cache: "no-store",
+      });
 
-        if (!response.ok) {
-          setUser(null);
-          return;
-        }
-
-        const data = (await response.json()) as AuthResponse;
-        setUser(data.clientPrinciple);
-      } catch (error) {
-        console.error("Unable to load authentication state.", error);
-        setUser(null);
-      } finally {
-        setIsAuthLoading(false);
+      if (!response.ok) {
+        throw new Error(
+          `Authentication request failed: ${response.status}`,
+        );
       }
-    }
 
-    void loadUser();
-  }, []);
+      const data = (await response.json()) as AuthResponse;
+
+      console.log("Authentication response:", data);
+
+      setUser(data.clientPrinciple ?? null);
+    } catch (error) {
+      console.error("Unable to load authentication state:", error);
+      setUser(null);
+    } finally {
+      setIsAuthLoading(false);
+    }
+  }
+
+  void loadUser();
+}, []);
 
   useEffect(() => {
     async function loadImages() {
