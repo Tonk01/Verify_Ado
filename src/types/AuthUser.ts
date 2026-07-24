@@ -1,4 +1,4 @@
-export type ClientPrinciple = {
+export type clientPrincipal = {
     identityProvider: string;
     userId: string;
     userDetails: string;
@@ -6,5 +6,5 @@ export type ClientPrinciple = {
 };
 
 export type AuthResponse = {
-    clientPrinciple: ClientPrinciple | null;
+    clientPrincipal: clientPrincipal | null;
 };

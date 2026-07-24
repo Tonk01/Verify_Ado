@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import "./App.css";
 import Admin from "./pages/Admin";
-import type { AuthResponse, ClientPrinciple } from "./types/AuthUser";
+import type { AuthResponse, clientPrincipal } from "./types/AuthUser";
 import type { ImageItem } from "./types/ImageItem";
 
 type Page = "gallery" | "admin";
@@ -14,7 +14,7 @@ function App() {
     useState<ImageItem | null>(null);
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
 
-  const [user, setUser] = useState<ClientPrinciple | null>(null);
+  const [user, setUser] = useState<clientPrincipal | null>(null);
   const [isAuthLoading, setIsAuthLoading] = useState(true);
 
   const [isLoading, setIsLoading] = useState(true);
@@ -41,7 +41,7 @@ useEffect(() => {
 
       console.log("Authentication response:", data);
 
-      setUser(data.clientPrinciple ?? null);
+      setUser(data.clientPrincipal ?? null);
     } catch (error) {
       console.error("Unable to load authentication state:", error);
       setUser(null);
