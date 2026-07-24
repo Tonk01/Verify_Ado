@@ -10,6 +10,7 @@ function App() {
   const [images, setImages] = useState<ImageItem[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedImage, setSelectedImage] = useState<ImageItem | null>(null);
+  const [selectImageIndex, setSelectedImageIndex] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState("");
 
@@ -43,6 +44,42 @@ function App() {
     setPage("gallery");
   }
 
+  function openImageViewer(image: ImageItem) {
+    setSelectedImage(image);
+    setSelectedImageIndex(0);
+  }
+
+  function closeImageViewer() {
+    setSelectedImage(null);
+  }
+
+  function showPreviousImage() {
+    if(!selectedImage) {
+      return;
+    }
+
+    setSelectedImageIndex((currentIndex) => {
+      if (currentIndex === 0) {
+        return selectedImage.imageURLs.length - 1;
+      }
+      return currentIndex - 1;
+    });
+  }
+
+  function showNextImage() {
+    if(!selectedImage) {
+      return;
+    }
+
+    setSelectedImageIndex((currentIndex) => {
+      if(currentIndex === selectedImage.imageURLs.length - 1)
+    {
+      return 0;
+    }
+    return currentIndex +1;
+    });
+  }
+
   const filteredImages = useMemo(() => {
     const search = searchTerm.trim().toLowerCase();
 
@@ -51,7 +88,7 @@ function App() {
     }
 
     return images.filter((image) => {
-      const searchableText = [image.title, image.description, image.category, ...image.tags,].join(" ").toLowerCase();
+      const searchableText = [image.title, image.description, ...image.tags,].join(" ").toLowerCase();
 
       return searchableText.includes(search);
     });
@@ -82,8 +119,7 @@ function App() {
       ) : (
         <>
           <header className="page-header">
-            <h1>Image Catalogue</h1>
-            <p>Search uploaded images.</p>
+            <p>Search for uploaded images.</p>
 
             <input
               className="search-input"
@@ -100,27 +136,50 @@ function App() {
 
           {!isLoading && !error && (
             <section className="gallery">
-              {filteredImages.map((image) => (
-                <button
-                  className="image-card"
-                  key={image.id}
-                  type="button"
-                  onClick={() => setSelectedImage(image)}
-                >
-                  <img src={image.imageURL} alt={image.title} />
+              {filteredImages.map((image) => {
+                const coverImage = image.imageURLs?.[0];
 
-                  <div className="image-card-content">
-                    <h2>{image.title}</h2>
-                    <p>{image.description}</p>
+                return (
+                  <button
+                    className="image-card"
+                    key={image.id}
+                    type="button"
+                    onClick={() => openImageViewer(image)}
+                  >
+                    {coverImage ? (
+                      <img
+                        src={coverImage}
+                        alt={image.title}
+                      />
+                    ) : (
+                      <div className="missing-image">
+                        No image available
+                      </div>
+                    )}
 
-                    <div className="tag-list">
-                      {image.tags.map((tag) => (
-                        <span key={`${image.id}-${tag}`}>{tag}</span>
-                      ))}
+                    <div className="image-card-content">
+                      <h2>{image.title}</h2>
+                      <p>{image.description}</p>
+
+                      {image.imageURLs.length > 1 && (
+                        <p className="image-count">
+                          {image.imageURLs.length} images
+                        </p>
+                      )}
+
+                      <div className="tag-list">
+                        {image.tags.map((tag) => (
+                          <span
+                            key={`${image.id}-${tag}`}
+                          >
+                            {tag}
+                          </span>
+                        ))}
+                      </div>
                     </div>
-                  </div>
-                </button>
-              ))}
+                  </button>
+                );
+              })}
             </section>
           )}
 
@@ -130,11 +189,11 @@ function App() {
         </>
       )}
 
-      {selectedImage && (
-        <div
-          className="modal-backdrop"
-          role="presentation"
-          onClick={() => setSelectedImage(null)}
+      {selectedImage && selectedImage.imageURLs.length > 0 && (
+
+        <div className="modal-backdrop"
+        role="presentation"
+        onClick={closeImageViewer}
         >
           <div
             className="modal"
@@ -147,16 +206,43 @@ function App() {
               className="close-button"
               type="button"
               aria-label="Close image"
-              onClick={() => setSelectedImage(null)}
+              onClick={closeImageViewer}
             >
               ×
             </button>
 
-            <img
-              className="modal-image"
-              src={selectedImage.imageURL}
-              alt={selectedImage.title}
-            />
+            <div className="modal-image-wrapper">
+              {selectedImage.imageURLs.length > 1 && (
+                <button className="image-navigation previous"
+                type="button"
+                aria-label="Show previous image"
+                onClick={showPreviousImage}
+              >
+                ‹
+              </button>
+              )}
+
+              <img className="modal-image" src={selectedImage.imageURLs[selectImageIndex]}
+              alt={`${selectedImage.title} ${selectImageIndex + 1}`}
+              />
+
+              {selectedImage.imageURLs.length > 1 && (
+                <button className="image-navigation next"
+                type="button"
+                aria-label="Show next image"
+                onClick={showNextImage}
+              >
+                ›
+              </button>
+              )}
+            </div>
+
+            {selectedImage.imageURLs.length > 1 && (
+              <p className="modal-image-counter">
+                {selectImageIndex +1} of{" "}
+                {selectedImage.imageURLs.length}
+              </p>
+            )}
 
             <h2>{selectedImage.title}</h2>
             <p>{selectedImage.description}</p>

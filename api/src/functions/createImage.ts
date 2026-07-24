@@ -1,14 +1,13 @@
 import { app, HttpRequest, HttpResponseInit, InvocationContext } from "@azure/functions";
 import { CosmosClient } from "@azure/cosmos";
 import { randomUUID } from "node:crypto";
-import { promises } from "node:dns";
 
 type CreateImageRequest = {
     title?: string;
     description?: string;
     tags?: string[];
     category?: string;
-    imageURL: string;
+    imageURLs: string[];
 };
 
 export async function createImage(
@@ -35,14 +34,14 @@ export async function createImage(
         const body = (await request.json()) as CreateImageRequest;
 
         const title = body.title?.trim();
-        const imageURL = body.imageURL?.trim();
+        const imageURLs = Array.isArray(body.imageURLs) ? body.imageURLs.map((url) => url.trim()).filter(Boolean) : [];
         const category = body.category?.trim() || "uncategorized";
 
-        if (!title || !imageURL) {
+        if (!title || imageURLs.length === 0) {
             return {
                 status: 400,
                 jsonBody: {
-                    error: "Title and imageURL are required",
+                    error: "Title and atleast one imageURL are required",
                 },
             };
         }
@@ -53,7 +52,7 @@ export async function createImage(
             description: body.description?.trim() || "",
             tags: Array.isArray(body.tags) ? body.tags.map((tag) => tag.trim()).filter(Boolean) : [],
             category,
-            imageURL,
+            imageURLs,
             createdAt: new Date().toISOString(),
         };
 

@@ -1,0 +1,22 @@
+{
+  "routes": [
+    {
+      "route": "/api/images/upload",
+      "methods": ["POST"],
+      "allowedRoles": ["admin"]
+    },
+    {
+      "route": "/api/images",
+      "methods": ["POST"],
+      "allowedRoles": ["admin"]
+    },
+    {
+      "route": "/api/images",
+      "methods": ["GET"],
+      "allowedRoles": ["anonymous", "authenticated"]
+    }
+  ],
+  "navigationFallback": {
+    "rewrite": "/index.html"
+  }
+}

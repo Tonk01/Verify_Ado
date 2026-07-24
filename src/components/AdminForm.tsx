@@ -18,46 +18,44 @@ function AdminForm({ onAddImage }: AdminFormProps) {
     const [title, setTitle] = useState("");
     const [description, setDescription] = useState("");
     const [tags, setTags] = useState("");
-    const [category, setCategory] = useState("");
-    const [selectedFile, setSelectedFile] = useState<File | null>(null);
-    const [previewURL, setPreviewURL] = useState("");
+    const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
+    const [previewURLs, setPreviewURLs] = useState<string[]>([]);
     const [message, setMessage] = useState("");
     const [isDragging, setIsDragging] = useState(false);
     const [isSubmitting, setIsSubmitting] = useState(false);
 
     useEffect(() => {
-        if (!selectedFile) {
-            setPreviewURL("");
+        if (selectedFiles.length === 0) {
+            setPreviewURLs([]);
             return;
         }
 
-        const objectURL = URL.createObjectURL(selectedFile);
-        setPreviewURL(objectURL);
+        const objectURLs = selectedFiles.map((file) => URL.createObjectURL(file));
+        setPreviewURLs(objectURLs)
 
-        return () => URL.revokeObjectURL(objectURL);
-    }, [selectedFile]);
+        return () => { objectURLs.forEach((url) => URL.revokeObjectURL(url));
+      };
+    }, [selectedFiles]);
 
-    function validateAndSelectFile(file: File) {
+    function validateAndSelectFile(files: File[]) {
         setMessage("");
 
-        if (!file.type.startsWith("image/")) {
-            setMessage("Only image files are allowed.");
-            return;
+        const validFiles = files.filter((file) => {
+          return file.type.startsWith("image/") && file.size <= maximumFileSize;
+        });
+
+        if (validFiles.length !== files.length) {
+          setMessage("Some files were skipped because they were invalid or larger than 10 MB")
         }
 
-        if (file.size > maximumFileSize) {
-            setMessage("Image must be smaller than 10 MB");
-            return;
-        }
-
-        setSelectedFile(file)
+        setSelectedFiles((currentFiles) => [...currentFiles, ...validFiles]);
     }
 
     function handleFileChange(event: ChangeEvent<HTMLInputElement>) {
-        const file = event.target.files?.[0];
+        const files = Array.from(event.target.files ?? []);
 
-        if (file) {
-            validateAndSelectFile(file);
+        if (files.length > 0) {
+            validateAndSelectFile(files);
         }
     }
 
@@ -90,10 +88,10 @@ function AdminForm({ onAddImage }: AdminFormProps) {
       event.stopPropagation();
       setIsDragging(false);
 
-      const file = event.dataTransfer.files?.[0];
+      const files = Array.from(event.dataTransfer.files);
 
-      if (file) {
-        validateAndSelectFile(file);
+      if (files.length > 0) {
+        validateAndSelectFile(files)
       }
     }
 
@@ -102,71 +100,88 @@ function AdminForm({ onAddImage }: AdminFormProps) {
 
         const cleanTitle = title.trim();
 
-        if (!cleanTitle || !selectedFile) {
-            setMessage("Title and image file are required")
+        if (!cleanTitle || selectedFiles.length === 0) {
+            setMessage("Title and image file are required",);
             return;
         }
 
         setIsSubmitting(true);
         setMessage("");
 
-        try {
-            const uploadFormData = new FormData();
-            uploadFormData.append("image", selectedFile);
+    try {
+      const imageURLs: string[] = [];
 
-            const uploadResponse = await fetch("http://localhost:7071/api/images/upload", {
-                method: "POST",
-                body: uploadFormData,
-                },
-            );
+      for (const file of selectedFiles) {
+        const uploadFormData = new FormData();
+        uploadFormData.append("image", file);
 
-            if (!uploadResponse.ok) {
-                throw new Error(`Upload failed with status ${uploadResponse.status}`);
-            }
-
-            const uploadResult = (await uploadResponse.json()) as UploadResponse;
-
-            const metadataResponse = await fetch("http://localhost:7071/api/images", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                },
-                body: JSON.stringify({
-                    title: cleanTitle,
-                    description: description.trim(),
-                    tags: tags.split(",").map((tag) => tag.trim()).filter(Boolean), 
-                    category: category.trim() || "uncategorized",
-                    imageURL: uploadResult.imageURL,
-                }),
-            },
+        const uploadResponse = await fetch(
+          "http://localhost:7071/api/images/upload",
+          {
+            method: "POST",
+            body: uploadFormData,
+          },
         );
 
-        if (!metadataResponse.ok) {
-            throw new Error(`Metadata request failed with status ${metadataResponse.status}`,);
-        }
-        
-        const createdImage = (await metadataResponse.json()) as ImageItem;
-
-        onAddImage(createdImage);
-
-        setTitle("");
-        setDescription("");
-        setTags("");
-        setCategory("");
-        setSelectedFile(null);
-
-        if (fileInputRef.current) {
-            fileInputRef.current.value = "";
+        if (!uploadResponse.ok) {
+          throw new Error(
+            `Upload failed with status ${uploadResponse.status}`,
+          );
         }
 
-        setMessage("Image uploaded successfully.");
-        } catch (error) {
-            console.error(error);
-            setMessage("Unable to upload and save the image");
-        } finally {
-            setIsSubmitting(false);
-        }
+        const uploadResult =
+          (await uploadResponse.json()) as UploadResponse;
+
+        imageURLs.push(uploadResult.imageURL);
+      }
+
+      const metadataResponse = await fetch(
+        "http://localhost:7071/api/images",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            title: cleanTitle,
+            description: description.trim(),
+            tags: tags
+              .split(",")
+              .map((tag) => tag.trim())
+              .filter(Boolean),
+            category: "images",
+            imageURLs,
+          }),
+        },
+      );
+
+      if (!metadataResponse.ok) {
+        throw new Error(
+          `Metadata request failed with status ${metadataResponse.status}`,
+        );
+      }
+
+      const createdImage = (await metadataResponse.json()) as ImageItem;
+
+      onAddImage(createdImage);
+
+      setTitle("");
+      setDescription("");
+      setTags("");
+      setSelectedFiles([]);
+
+      if (fileInputRef.current) {
+        fileInputRef.current.value = "";
+      }
+
+      setMessage("Images uploaded successfully.");
+    } catch (error) {
+      console.error(error);
+      setMessage("Unable to upload and save the images.");
+    } finally {
+      setIsSubmitting(false);
     }
+  }
 
     return (
     <form className="admin-form" onSubmit={handleSubmit}>
@@ -199,15 +214,6 @@ function AdminForm({ onAddImage }: AdminFormProps) {
         />
       </label>
 
-      <label>
-        Category
-        <input
-          type="text"
-          value={category}
-          onChange={(event) => setCategory(event.target.value)}
-        />
-      </label>
-
       <div
         className={`upload-area ${isDragging ? "dragging" : ""}`}
         onDragEnter={handleDragEnter}
@@ -229,21 +235,37 @@ function AdminForm({ onAddImage }: AdminFormProps) {
           className="file-input"
           type="file"
           accept="image/*"
+          multiple
           onChange={handleFileChange}
         />
 
-        {selectedFile && <p>{selectedFile.name}</p>}
+        {selectedFiles.length > 0 && (
+          <ul className="selected-file-list">
+            {selectedFiles.map((file) => (
+              <li key={`${file.name}-${file.lastModified}`}> {file.name} </li>
+            ))}
+          </ul>
+        )}
       </div>
 
-      {previewURL && (
+      {previewURLs.length > 0 && (
         <div className="admin-preview">
           <p>Preview</p>
-          <img src={previewURL} alt={title || "Image preview"} />
+
+          <div className="preview-grid">
+            {previewURLs.map((url,index) => (
+              <img 
+              key={url}
+              src={url}
+              alt={`${title || "Image preview"} ${index + 1}`}
+              />
+            ))}
+          </div>
         </div>
       )}
 
       <button type="submit" disabled={isSubmitting}>
-        {isSubmitting ? "Uploading..." : "Upload Image"}
+        {isSubmitting ? "Uploading..." : "Upload Images"}
       </button>
 
       {message && <p className="admin-message">{message}</p>}

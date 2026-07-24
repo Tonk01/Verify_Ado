@@ -4,7 +4,7 @@ export type ImageItem = {
     description: string;
     tags: string[];
     category: string;
-    imageURL: string;
+    imageURLs: string[];
     createdAt?: string;
 };
 

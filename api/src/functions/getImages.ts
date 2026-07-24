@@ -26,7 +26,7 @@ export async function getImages(request: HttpRequest, context: InvocationContext
 
         const container = client.database(databaseId).container(containerId);
 
-        const { resources } = await container.items.query({ query: `SELECT c.id, c.title, c.description, c.tags, c.category, c.imageURL from c`,}).fetchAll();
+        const { resources } = await container.items.query({ query: `SELECT c.id, c.title, c.description, c.tags, c.category, c.imageURLs from c`,}).fetchAll();
 
         return {
             status: 200,
