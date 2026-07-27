@@ -135,19 +135,6 @@ useEffect(() => {
     });
   }
 
-  function handleZoomMove( event: React.MouseEvent<HTMLImageElement>) {
-    const image = event.currentTarget;
-    const bounds = image.getBoundingClientRect();
-
-    const x =
-      ((event.clientX - bounds.left) / bounds.width) * 100;
-
-    const y =
-      ((event.clientY - bounds.top) / bounds.height) * 100;
-
-    setZoomPosition({ x, y });
-  }
-
   const filteredImages = useMemo(() => {
     const search = searchTerm.trim().toLowerCase();
 
