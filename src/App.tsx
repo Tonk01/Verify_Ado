@@ -20,12 +20,6 @@ function App() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState("");
 
-  const [isZoomed, setIsZoomed] = useState(false);
-  const [zoomPosition, setZoomPosition] = useState({
-    x:50, 
-    y: 50,
-  });
-
   const isAdmin = user?.userRoles.includes("admin") ?? false;
 
 useEffect(() => {
@@ -136,17 +130,6 @@ useEffect(() => {
 
       return currentIndex + 1;
     });
-  }
-
-  function handleZoomMove( event: React.MouseEvent<HTMLImageElement>) {
-    const image = event.currentTarget;
-    const bounds = image.getBoundingClientRect();
-
-    const x = ((event.clientX - bounds.left) / bounds.width) * 100;
-
-    const y = ((event.clientY - bounds.top) / bounds.height) * 100;
-
-    setZoomPosition({ x, y });
   }
 
   const filteredImages = useMemo(() => {
@@ -340,21 +323,15 @@ useEffect(() => {
                 )}
 
                 <img
-                  className={`modal-image" ${ isZoomed ? "zoomed" : "" } `}
-
+                  className="modal-image"
                   src={
                     selectedImage.imageURLs[
                       selectedImageIndex
                     ]
                   }
-                  alt={`${selectedImage.title} ${ selectedImageIndex + 1 }`}
-
-                  onMouseEnter={() => setIsZoomed(true)}
-                  onMouseLeave={() => setIsZoomed(false)}
-                  onMouseMove={handleZoomMove}
-
-                  style={{ transformOrigin: `${zoomPosition.x}% ${zoomPosition.y}%`, 
-                  }}
+                  alt={`${selectedImage.title} ${
+                    selectedImageIndex + 1
+                  }`}
                 />
 
                 {selectedImage.imageURLs.length > 1 && (

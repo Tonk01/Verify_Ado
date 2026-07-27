@@ -188,8 +188,6 @@ input {
   background: #020617;
   object-fit: contain;
   object-position: center;
-  transition: transform 0.15s ease;
-  cursor: zoom-in;
 }
 
 .modal h2 {
@@ -433,7 +431,6 @@ input {
 
 .modal-image-wrapper {
   position: relative;
-  overflow: hidden;
 }
 
 .image-navigation {
