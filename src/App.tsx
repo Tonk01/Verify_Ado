@@ -22,6 +22,7 @@ function App() {
 
   const [isZoomed, setIsZoomed] = useState(false);
   const [zoomPosition, setZoomPosition] = useState({ x: 50, y: 50, });
+  const [isLightboxOpen, setIsLightboxOpen] = useState(false);
 
   const isAdmin = user?.userRoles.includes("admin") ?? false;
 
@@ -97,12 +98,35 @@ useEffect(() => {
   function openImageViewer(image: ImageItem) {
     setSelectedImage(image);
     setSelectedImageIndex(0);
+    setIsLightboxOpen(false);
+    setIsZoomed(false);
   }
 
   function closeImageViewer() {
     setSelectedImage(null);
     setSelectedImageIndex(0);
+    setIsLightboxOpen(false);
+    setIsZoomed(false);
   }
+
+  function openFocusedViewer() {
+    setIsLightboxOpen(true);
+    setIsZoomed(false);
+    setZoomPosition({ x: 50, y: 50 });
+  }
+
+  function closeFocusedViewer() {
+    setIsLightboxOpen(false);
+    setIsZoomed(false);
+    setZoomPosition({ x: 50, y: 50 });
+  }
+
+  function selectImage(index: number) {
+    setSelectedImageIndex(index);
+    setIsZoomed(false)
+    setZoomPosition({ x: 50, y: 50 });
+  }
+
 
   function showPreviousImage() {
     if (!selectedImage) {
@@ -156,7 +180,9 @@ useEffect(() => {
     });
   }, [images, searchTerm]);
 
-  return (
+
+    // view
+    return (
     <main className="app">
       <nav className="main-navigation">
         <button
@@ -288,8 +314,8 @@ useEffect(() => {
         </>
       )}
 
-      {selectedImage &&
-        selectedImage.imageURLs.length > 0 && (
+      {selectedImage && selectedImage.imageURLs.length > 0 && (
+        <>
           <div
             className="modal-backdrop"
             role="presentation"
@@ -300,9 +326,7 @@ useEffect(() => {
               role="dialog"
               aria-modal="true"
               aria-label={selectedImage.title}
-              onClick={(event) =>
-                event.stopPropagation()
-              }
+              onClick={(event) => event.stopPropagation()}
             >
               <button
                 className="close-button"
@@ -310,7 +334,7 @@ useEffect(() => {
                 aria-label="Close image viewer"
                 onClick={closeImageViewer}
               >
-              
+                ×
               </button>
 
               <div className="modal-image-wrapper">
@@ -325,39 +349,25 @@ useEffect(() => {
                   </button>
                 )}
 
-                <div
-                  className="inspection-viewport"
-                  onClick={() => { setIsZoomed((current) => !current); 
-                  }}
-
-                  onMouseMove={(event) => {
-                    const bounds =
-                      event.currentTarget.getBoundingClientRect();
-
-                    const x =
-                      ((event.clientX - bounds.left) / bounds.width) * 100;
-
-                    const y =
-                      ((event.clientY - bounds.top) / bounds.height) * 100;
-
-                    setZoomPosition({
-                      x: Math.max(0, Math.min(100, x)),
-                      y: Math.max(0, Math.min(100, y)),
-                    });
-                  }}
-                >
-                  <img
-                    className={`inspection-image ${
-                      isZoomed ? "zoomed" : ""
-                    }`}
-                    src={selectedImage.imageURLs[selectedImageIndex]}
-                    alt={`${selectedImage.title} ${
-                      selectedImageIndex + 1
-                    }`}
-                    style={{
-                      transformOrigin: `${zoomPosition.x}% ${zoomPosition.y}%`,
-                    }}
-                  />
+                <div className="inspection-viewport">
+                  <button
+                    className="inspection-image-button"
+                    type="button"
+                    aria-label="Open focused image viewer"
+                    onClick={openFocusedViewer}
+                  >
+                    <img
+                      className="inspection-image"
+                      src={
+                        selectedImage.imageURLs[
+                          selectedImageIndex
+                        ]
+                      }
+                      alt={`${selectedImage.title} ${
+                        selectedImageIndex + 1
+                      }`}
+                    />
+                  </button>
                 </div>
 
                 {selectedImage.imageURLs.length > 1 && (
@@ -386,7 +396,155 @@ useEffect(() => {
               )}
             </div>
           </div>
-        )}
+
+          {isLightboxOpen && (
+            <div
+              className="focused-lightbox-backdrop"
+              role="presentation"
+              onClick={closeFocusedViewer}
+            >
+              <div
+                className="focused-lightbox"
+                role="dialog"
+                aria-modal="true"
+                aria-label={`${selectedImage.title} focused viewer`}
+                onClick={(event) => event.stopPropagation()}
+              >
+                <button
+                  className="focused-lightbox-close"
+                  type="button"
+                  aria-label="Close focused image viewer"
+                  onClick={closeFocusedViewer}
+                >
+                  ×
+                </button>
+
+                {selectedImage.imageURLs.length > 1 && (
+                  <aside
+                    className="focused-thumbnails"
+                    aria-label="Image thumbnails"
+                  >
+                    {selectedImage.imageURLs.map(
+                      (imageURL, index) => (
+                        <button
+                          key={`${imageURL}-${index}`}
+                          className={
+                            selectedImageIndex === index
+                              ? "focused-thumbnail active"
+                              : "focused-thumbnail"
+                          }
+                          type="button"
+                          aria-label={`Show image ${index + 1}`}
+                          onClick={() => selectImage(index)}
+                        >
+                          <img src={imageURL} alt="" />
+                        </button>
+                      ),
+                    )}
+                  </aside>
+                )}
+
+                <div className={`focused-image-area ${isZoomed ? "zoom-active" : ""}`}
+
+                  onClick={() => {
+                    if (!isZoomed) {
+                      return;
+                    }
+
+                    setIsZoomed(false);
+                    setZoomPosition({ x: 50, y: 50 })
+                  }}
+
+                    onMouseMove={(event) => {
+                      if (!isZoomed) {
+                        return;
+                      }
+
+                      const bounds = event.currentTarget.getBoundingClientRect();
+
+                      const Px = ((event.clientX - bounds.left) / bounds.width)
+                      const Py = ((event.clientY - bounds.top) / bounds.height)
+
+                      const x =  0 + Px * 100
+                      const y = -6 + Py * 110
+
+                      setZoomPosition({
+                        x: Math.max(0, Math.min(100, x)),
+                        y: Math.max(-6, Math.min(110, y)),
+                      });
+                    }}
+                  >
+
+                  {selectedImage.imageURLs.length > 1 && (
+                    <button
+                      className="focused-navigation previous"
+                      type="button"
+                      aria-label="Show previous image"
+                      onClick={showPreviousImage}
+                    >
+                      ‹
+                    </button>
+                  )}
+
+                  <button
+                    className={`focused-image-button ${
+                      isZoomed ? "zoomed" : ""
+                    }`}
+                    type="button"
+                    aria-label={
+                      isZoomed
+                        ? "Return image to normal size"
+                        : "Inspect image"
+                    }
+
+                    onClick={(event) => {
+                      event.stopPropagation();
+
+                      if(!isZoomed) {
+                        setIsZoomed(true);
+                      } else {
+                        setIsZoomed(false);
+                        setZoomPosition({ x: 50, y: 50 });
+                      }
+                    }}
+                  >
+                    <img
+                      className="focused-main-image"
+                      src={
+                        selectedImage.imageURLs[
+                          selectedImageIndex
+                        ]
+                      }
+                      alt={`${selectedImage.title} ${
+                        selectedImageIndex + 1
+                      }`}
+                      style={{
+                        transformOrigin: `${zoomPosition.x}% ${zoomPosition.y}%`,
+                      }}
+                    />
+                  </button>
+
+                  {selectedImage.imageURLs.length > 1 && (
+                    <button
+                      className="focused-navigation next"
+                      type="button"
+                      aria-label="Show next image"
+                      onClick={showNextImage}
+                    >
+                      ›
+                    </button>
+                  )}
+                </div>
+
+                <p className="focused-image-counter">
+                  {selectedImageIndex + 1} of{" "}
+                  {selectedImage.imageURLs.length}
+                </p>
+              </div>
+            </div>
+          )}
+        </>
+      )}
     </main>
   );
 }

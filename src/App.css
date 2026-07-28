@@ -131,12 +131,6 @@ input {
   line-height: 1.5;
 }
 
-.image-count {
-  color: #60a5fa;
-  font-size: 0.9rem;
-  font-weight: 600;
-}
-
 .tag-list {
   display: flex;
   flex-wrap: wrap;
@@ -372,29 +366,6 @@ input {
   color: #b91c1c;
 }
 
-.upload-area {
-  padding: 28px;
-  border: 2px dashed #94a3b8;
-  border-radius: 12px;
-  text-align: center;
-  transition:
-    border-color 0.2s ease,
-    background 0.2s ease;
-}
-
-.upload-area.dragging {
-  border-color: #2563eb;
-  background: #eff6ff;
-}
-
-.upload-area p {
-  margin-top: 0;
-}
-
-.upload-area button {
-  width: auto;
-}
-
 .file-input {
   display: none;
 }
@@ -531,37 +502,180 @@ input {
 }
 
 .inspection-viewport {
-  position: relative;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: calc(100% + 24px);
-  height: calc(min(70vh, 760px) + 28px);
-  margin: -4px;
-  padding: 4px;
-  box-sizing: border-box;
+  display: grid;
+  width: 100%;
+  height: min(70vh, 760px);
+  padding: 0;
+  place-items: center;
   overflow: hidden;
+  background: #020617;
+}
+
+.inspection-image-button {
+  display: block;
+  width: fit-content;
+  max-width: 100%;
+  height: fit-content;
+  max-height: 100%;
+  padding: 0;
+  border: 0;
+  background: transparent;
   cursor: zoom-in;
 }
 
 .inspection-image {
   display: block;
-  width: 100%;
-  height: 100%;
+  max-width: 100%;
+  max-height: min(70vh, 760px);
   object-fit: contain;
-  transition: transform 0.08s linear;
   user-select: none;
   pointer-events: none;
 }
 
-.inspection-image.zoomed {
-  transform: scale(3.5);
+/* Focused viewer */
+
+.focused-lightbox-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 2000;
+  display: grid;
+  padding: 20px;
+  place-items: center;
+  background: rgb(0 0 0 / 97%);
 }
 
-.inspection-viewport {
+.focused-lightbox {
+  position: relative;
+  display: grid;
+  grid-template-columns: 92px minmax(0, 1fr);
+  grid-template-rows: minmax(0, 1fr) auto;
+  gap: 12px 20px;
+  width: min(100%, 1600px);
+  height: 94vh;
+}
+
+.focused-thumbnails {
+  display: flex;
+  min-height: 0;
+  flex-direction: column;
+  gap: 10px;
+  overflow-y: auto;
+}
+
+.focused-thumbnail {
+  width: 100%;
+  padding: 3px;
+  border: 1px solid transparent;
+  background: transparent;
+  cursor: pointer;
+}
+
+.focused-thumbnail.active {
+  border-color: #38bdf8;
+}
+
+.focused-thumbnail img {
+  display: block;
+  width: 100%;
+  aspect-ratio: 1;
+  object-fit: cover;
+}
+
+.focused-image-area {
+  position: relative;
+  display: grid;
+  min-width: 0;
+  min-height: 0;
+  padding: clamp(20px, 5vh, 70px)
+    clamp(20px, 4vw, 80px);
+  place-items: center;
+  overflow: hidden;
+  background: transparent;
+}
+
+.focused-image-area.zoom-active {
+  cursor: crosshair;
+}
+
+.focused-image-button {
+  display: block;
+  width: fit-content;
+  max-width: 100%;
+  height: fit-content;
+  max-height: 100%;
+  padding: 0;
+  overflow: hidden;
+  border: 0;
+  background: transparent;
   cursor: zoom-in;
 }
 
-.inspection-viewport:has(.inspection-image.zoomed) {
+.focused-main-image {
+  display: block;
+  max-width: 100%;
+  max-height: calc(94vh - 140px);
+  object-fit: contain;
+  transition: transform 0.08s linear;
+  transform-origin: center;
+  user-select: none;
+  pointer-events: none;
+}
+
+.focused-image-button.zoomed {
+  overflow: visible;
   cursor: zoom-out;
+}
+.focused-image-button.zoomed .focused-main-image {
+  transform: scale(3.0);
+}
+
+.focused-navigation {
+  position: absolute;
+  top: 50%;
+  z-index: 5;
+  display: grid;
+  width: 46px;
+  height: 46px;
+  padding: 0;
+  place-items: center;
+  border: 0;
+  border-radius: 50%;
+  background: rgb(15 23 42 / 88%);
+  color: white;
+  font-size: 2rem;
+  cursor: pointer;
+  transform: translateY(-50%);
+}
+
+.focused-navigation.previous {
+  left: 16px;
+}
+
+.focused-navigation.next {
+  right: 16px;
+}
+
+.focused-lightbox-close {
+  position: absolute;
+  top: 0;
+  right: 0;
+  z-index: 10;
+  display: grid;
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  place-items: center;
+  border: 0;
+  border-radius: 50%;
+  background: rgb(15 23 42 / 90%);
+  color: white;
+  font-size: 1.8rem;
+  cursor: pointer;
+}
+
+.focused-image-counter {
+  grid-column: 2;
+  margin: 0;
+  color: #94a3b8;
+  text-align: center;
 }
