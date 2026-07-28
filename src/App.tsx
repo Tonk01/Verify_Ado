@@ -280,7 +280,7 @@ useEffect(() => {
                         <p>{image.description}</p>
                       )}
 
-                      {image.imageURLs.length > 1 && (
+                      {image.imageURLs.length >= 1 && (
                         <p className="image-count">
                           {image.imageURLs.length} images
                         </p>
@@ -338,7 +338,7 @@ useEffect(() => {
               </button>
 
               <div className="modal-image-wrapper">
-                {selectedImage.imageURLs.length > 1 && (
+                {selectedImage.imageURLs.length >= 1 && (
                   <button
                     className="image-navigation previous"
                     type="button"
@@ -370,7 +370,7 @@ useEffect(() => {
                   </button>
                 </div>
 
-                {selectedImage.imageURLs.length > 1 && (
+                {selectedImage.imageURLs.length >= 1 && (
                   <button
                     className="image-navigation next"
                     type="button"
@@ -382,7 +382,7 @@ useEffect(() => {
                 )}
               </div>
 
-              {selectedImage.imageURLs.length > 1 && (
+              {selectedImage.imageURLs.length >= 1 && (
                 <p className="modal-image-counter">
                   {selectedImageIndex + 1} of{" "}
                   {selectedImage.imageURLs.length}
@@ -419,7 +419,7 @@ useEffect(() => {
                   ×
                 </button>
 
-                {selectedImage.imageURLs.length > 1 && (
+                {selectedImage.imageURLs.length >= 1 && (
                   <aside
                     className="focused-thumbnails"
                     aria-label="Image thumbnails"
@@ -475,7 +475,7 @@ useEffect(() => {
                     }}
                   >
 
-                  {selectedImage.imageURLs.length > 1 && (
+                  {selectedImage.imageURLs.length >= 1 && (
                     <button
                       className="focused-navigation previous"
                       type="button"
@@ -524,7 +524,7 @@ useEffect(() => {
                     />
                   </button>
 
-                  {selectedImage.imageURLs.length > 1 && (
+                  {selectedImage.imageURLs.length >= 1 && (
                     <button
                       className="focused-navigation next"
                       type="button"
