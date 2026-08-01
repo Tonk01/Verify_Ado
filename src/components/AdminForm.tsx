@@ -116,7 +116,7 @@ function AdminForm({ onAddImage }: AdminFormProps) {
         uploadFormData.append("image", file);
 
          const uploadResponse = await fetch(
-          "/api/images/upload",
+          "http://localhost:7071/api/images/upload",
           {
             method: "POST",
             body: uploadFormData,
@@ -136,7 +136,7 @@ function AdminForm({ onAddImage }: AdminFormProps) {
       }
 
       const metadataResponse = await fetch(
-        "/api/images",
+        "http://localhost:7071/api/images",
         {
           method: "POST",
           headers: {

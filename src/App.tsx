@@ -222,7 +222,7 @@ useEffect(() => {
         setIsLoading(true);
         setError("");
 
-        const response = await fetch("api/images");
+        const response = await fetch("http://localhost:7071/api/images");
 
         if (!response.ok) {
           throw new Error(
