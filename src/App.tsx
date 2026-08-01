@@ -6,6 +6,163 @@ import type { ImageItem } from "./types/ImageItem";
 
 type Page = "gallery" | "admin";
 
+
+
+type FilterOption = {
+  label: string;
+  tag: string;
+  imageURL: string;
+};
+
+const filterOptions: FilterOption[] = [
+  {
+    label: "5th Anniversary",
+    tag: "5th Anniversary",
+    imageURL: "/filter_images/5thani.jpg",
+  },
+  {
+    label: "Adobum",
+    tag: "Adobum",
+    imageURL: "/filter_images/Adobum_poster.jpg",
+  },
+  {
+    label: "Adoroza",
+    tag: "Adoroza",
+    imageURL: "/filter_images/Adoroza.png",
+  },
+  {
+    label: "Adotomy",
+    tag: "Adotomy",
+    imageURL: "/filter_images/Adotomy.jpg",
+  },
+  {
+    label: "Ao",
+    tag: "Ao",
+    imageURL: "/filter_images/Ao.webp",
+  },
+  {
+    label: "Campanella",
+    tag: "Campanella",
+    imageURL: "/filter_images/Campanella.jpg",
+  },
+  {
+    label: "Cd",
+    tag: "Cd",
+    imageURL: "/filter_images/Adobum_cd.webp",
+  },
+  {
+    label: "DokiDoki",
+    tag: "DokiDoki",
+    imageURL: "/filter_images/DokiDoki.jpg",
+  },
+  {
+    label: "EXPO2025",
+    tag: "EXPO2025",
+    imageURL: "/filter_images/EXPO2025.jpg",
+  },
+  {
+    label: "Figure",
+    tag: "Figure",
+    imageURL: "/filter_images/Ado_figure.jpg",
+  },
+  {
+    label: "Gacha",
+    tag: "Gacha",
+    imageURL: "/filter_images/Gacha.jpg",
+  },
+  {
+    label: "Georgia",
+    tag: "Georgia",
+    imageURL: "/filter_images/Georgia.jpg",
+  },
+  {
+    label: "Hibana",
+    tag: "Hibana",
+    imageURL: "/filter_images/Ado_hibana.png",
+  },
+  {
+    label: "DokiDoki",
+    tag: "DokiDoki",
+    imageURL: "/filter_images/DokiDoki.jpg",
+  },
+  {
+    label: "Kigeki",
+    tag: "Kigeki",
+    imageURL: "/filter_images/Kigeki.jpg",
+  },
+  {
+    label: "Kyougen",
+    tag: "Kyougen",
+    imageURL: "/filter_images/Kyougen.png",
+  },
+  {
+    label: "Mars",
+    tag: "Mars",
+    imageURL: "/filter_images/Mars.jpg",
+  },
+  {
+    label: "Mirage",
+    tag: "Mirage",
+    imageURL: "/filter_images/Mirage.jpg",
+  },
+  {
+    label: "Mona Lisa",
+    tag: "Mona Lisa",
+    imageURL: "/filter_images/Mona_lisa.webp",
+  },
+  {
+    label: "Plushie",
+    tag: "Plushie",
+    imageURL: "/filter_images/Plushie.jpg",
+  },
+  {
+    label: "Round1",
+    tag: "Round1",
+    imageURL: "/filter_images/Round1.jpg",
+  },
+  {
+    label: "Shinzou",
+    tag: "Shinzou",
+    imageURL: "/filter_images/Shinzou.jpg",
+  },
+  {
+    label: "Trading Cards",
+    tag: "Trading Cards",
+    imageURL: "/filter_images/Trading_card.jpg",
+  },
+  {
+    label: "Uta",
+    tag: "Uta",
+    imageURL: "/filter_images/Uta.jpg",
+  },
+  {
+    label: "Vinyl",
+    tag: "Vinyl",
+    imageURL: "/filter_images/Vivarium_vinyl.webp",
+  },
+  {
+    label: "Vivarium",
+    tag: "Vivarium",
+    imageURL: "/filter_images/Vivarium.png",
+  },
+  {
+    label: "Yodaka",
+    tag: "Yodaka",
+    imageURL: "/filter_images/Yodaka.jpg",
+  },
+  {
+    label: "Zanmu",
+    tag: "Zanmu",
+    imageURL: "/filter_images/Zanmu.png",
+  },
+  {
+    label: "Zipangu",
+    tag: "Zipangu",
+    imageURL: "/filter_images/Zipangu.jpg",
+  },
+];
+
+
 function App() {
   const [page, setPage] = useState<Page>("gallery");
   const [images, setImages] = useState<ImageItem[]>([]);
@@ -23,6 +180,8 @@ function App() {
   const [isZoomed, setIsZoomed] = useState(false);
   const [zoomPosition, setZoomPosition] = useState({ x: 50, y: 50, });
   const [isLightboxOpen, setIsLightboxOpen] = useState(false);
+
+  const [selectedTag, setSelectedTag] = useState("");
 
   const isAdmin = user?.userRoles.includes("admin") ?? false;
 
@@ -63,7 +222,7 @@ useEffect(() => {
         setIsLoading(true);
         setError("");
 
-        const response = await fetch("/api/images");
+        const response = await fetch("api/images");
 
         if (!response.ok) {
           throw new Error(
@@ -162,23 +321,24 @@ useEffect(() => {
   const filteredImages = useMemo(() => {
     const search = searchTerm.trim().toLowerCase();
 
-    if (!search) {
-      return images;
-    }
-
     return images.filter((image) => {
+      const matchesTag = !selectedTag || image.tags?.includes(selectedTag)
+
       const searchableText = [
         image.title,
         image.description,
         image.category,
         ...image.tags,
       ]
+        .filter(Boolean)
         .join(" ")
         .toLowerCase();
 
-      return searchableText.includes(search);
+        const matchesSearch = !search || searchableText.includes(search)
+
+      return matchesTag && matchesSearch;
     });
-  }, [images, searchTerm]);
+  }, [images, searchTerm, selectedTag]);
 
 
     // view
@@ -226,93 +386,126 @@ useEffect(() => {
         <Admin onAddImage={handleAddImage} />
       ) : (
         <>
-          <header className="page-header">
-            <p>Search uploaded images.</p>
 
-            <input
-              className="search-input"
-              type="search"
-              placeholder="Search"
-              value={searchTerm}
-              onChange={(event) =>
-                setSearchTerm(event.target.value)
-              }
-            />
-          </header>
+        <div className="gallery-layout">
+          <aside className="filter-sidebar">
+            <div className="filter-sidebar-header">
+              <h2>Filter</h2>
 
-          {isLoading && (
-            <p className="empty-message">
-              Loading images...
-            </p>
-          )}
+              {selectedTag && (
+                <button type="button" onClick={() => setSelectedTag("")}
+              >
+                Clear
+                </button>
+              )}
+            </div>
 
-          {error && (
-            <p className="error-message">{error}</p>
-          )}
-
-          {!isLoading && !error && (
-            <section className="gallery">
-              {filteredImages.map((image) => {
-                const coverImage = image.imageURLs?.[0];
-
-                return (
-                  <button
-                    className="image-card"
-                    key={image.id}
+            <div className="filter-sidebar-list">
+              {filterOptions.map((option) => (
+                <button
+                  key={option.tag}
+                  className={`filter-card ${
+                    selectedTag === option.tag ? "active" : ""
+                    }`}
                     type="button"
-                    onClick={() => openImageViewer(image)}
-                  >
-                    {coverImage ? (
-                      <img
-                        src={coverImage}
-                        alt={image.title}
-                      />
-                    ) : (
-                      <div className="missing-image">
-                        No image available
-                      </div>
-                    )}
+                    onClick={() => setSelectedTag(option.tag)}>
+                    
+                    <img 
+                      src={option.imageURL}
+                      alt=""
+                    />
 
-                    <div className="image-card-content">
-                      <h2>{image.title}</h2>
+                    <strong>{option.label}</strong>
+                </button>
+              ))}
+            </div>
+          </aside>
+          
+          <div className="gallery-content">
+            <header className="page-header">
+              <p>Search uploaded images</p>
 
-                      {image.description && (
-                        <p>{image.description}</p>
-                      )}
+              <input
+                className="search-input"
+                type="search"
+                placeholder="Search..."
+                value={searchTerm}
+                onChange={(event) => setSearchTerm(event.target.value)}
+              />
+            </header>
 
-                      {image.imageURLs.length >= 1 && (
-                        <p className="image-count">
-                          {image.imageURLs.length} images
-                        </p>
-                      )}
-
-                      {image.tags.length > 0 && (
-                        <div className="tag-list">
-                          {image.tags.map((tag) => (
-                            <span
-                              key={`${image.id}-${tag}`}
-                            >
-                              {tag}
-                            </span>
-                          ))}
-                        </div>
-                      )}
-                    </div>
-                  </button>
-                );
-              })}
-            </section>
-          )}
-
-          {!isLoading &&
-            !error &&
-            filteredImages.length === 0 && (
+            {isLoading && (
               <p className="empty-message">
-                No matching images found.
+                Loading images...
               </p>
             )}
-        </>
-      )}
+
+            {error && (
+              <p className="error-message">{error}</p>
+            )}
+
+            {!isLoading && !error && (
+              <section className="gallery">
+                {filteredImages.map((image) => {
+                  const coverImage = image.imageURLs?.[0];
+
+                  return (
+                    <button
+                      className="image-card"
+                      key={image.id}
+                      type="button"
+                      onClick={() => openImageViewer(image)}
+                    >
+                    
+                      {coverImage ? (
+                        <img
+                          src={coverImage}
+                          alt={image.title}
+                        />
+                      ) : (
+                        <div className="missing-image">
+                          No Image Available
+                        </div>
+                      )}
+
+                      <div className="image-card-content">
+                        <h2>{image.title}</h2>
+                      
+                        {image.description && (
+                          <p>{image.description}</p>
+                        )}
+
+                        {image.imageURLs.length >= 1 && (
+                          <p className="image-count">
+                            {image.imageURLs.length} images
+                          </p>
+                        )}
+
+                        {image.tags.length >= 1 && (
+                          <div className="tag-list">
+                            {image.tags.map((tag) => (
+                              <span
+                                key={`${image.id}-${tag}`}
+                              >
+                                {tag}
+                              </span>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    </button>
+                  );
+                })}
+              </section>
+            )}
+
+            {!isLoading && !error && filteredImages.length === 0 && (
+              <p className="empty-message">
+                No matching images found
+              </p>
+            )}
+          </div>
+        </div>
 
       {selectedImage && selectedImage.imageURLs.length > 0 && (
         <>
@@ -544,6 +737,8 @@ useEffect(() => {
             </div>
           )}
         </>
+      )}
+      </>
       )}
     </main>
   );
