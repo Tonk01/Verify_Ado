@@ -344,43 +344,6 @@ useEffect(() => {
     // view
     return (
     <main className="app">
-      <nav className="main-navigation">
-        <button
-          type="button"
-          className={page === "gallery" ? "active" : ""}
-          onClick={() => setPage("gallery")}
-        >
-          Gallery
-        </button>
-
-        {isAdmin && (
-          <button
-            type="button"
-            className={page === "admin" ? "active" : ""}
-            onClick={() => setPage("admin")}
-          >
-            Admin
-          </button>
-        )}
-
-        {!isAuthLoading && !user && (
-          <a
-            className="auth-link"
-            href="/.auth/login/aad?post_login_redirect_uri=/"
-          >
-            Sign in
-          </a>
-        )}
-
-        {!isAuthLoading && user && (
-          <a
-            className="auth-link"
-            href="/.auth/logout?post_logout_redirect_uri=/"
-          >
-            Sign out
-          </a>
-        )}
-      </nav>
 
       {page === "admin" && isAdmin ? (
         <Admin onAddImage={handleAddImage} />
@@ -422,6 +385,44 @@ useEffect(() => {
           </aside>
           
           <div className="gallery-content">
+
+            <nav className="main-navigation">
+              <button
+                type="button"
+                className={page === "gallery" ? "active" : ""}
+                onClick={() => setPage("gallery")}
+              >
+                Gallery
+              </button>
+
+              {isAdmin && (
+                <button
+                  type="button"
+                  className={page === "admin" ? "active" : ""}
+                  onClick={() => setPage("admin")}
+                >
+                  Admin
+                </button>
+              )}
+
+              {!isAuthLoading && !user && (
+                <a
+                  className="auth-link"
+                  href="/.auth/login/aad?post_login_redirect_uri=/"
+                >
+                  Sign in
+                </a>
+              )}
+
+              {!isAuthLoading && user && (
+                <a
+                  className="auth-link"
+                  href="/.auth/logout?post_logout_redirect_uri=/"
+                >
+                  Sign out
+                </a>
+              )}
+            </nav>
             <header className="page-header">
               <p>Search uploaded images</p>
 
