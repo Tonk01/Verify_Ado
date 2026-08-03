@@ -217,6 +217,30 @@ useEffect(() => {
 }, []);
 
   useEffect(() => {
+    if (!selectedImage?.imageURLs.length)
+      return;
+
+
+      const urls = selectedImage.imageURLs
+      const total = urls.length
+
+      const previousIndex = (selectedImageIndex - 1 + total) % total;
+
+      const nextIndex = (selectedImageIndex + 1) % total;
+
+      const urlsToPreload = [
+        urls[previousIndex],
+        urls[selectedImageIndex],
+        urls[nextIndex],
+      ];
+
+      urlsToPreload.forEach((url) => {
+        const preloadImage = new Image();
+        preloadImage.src = url;
+      });
+    }, [selectedImage, selectedImageIndex]);
+
+  useEffect(() => {
     async function loadImages() {
       try {
         setIsLoading(true);
@@ -462,6 +486,8 @@ useEffect(() => {
                         <img
                           src={coverImage}
                           alt={image.title}
+                          loading="lazy"
+                          decoding="async"
                         />
                       ) : (
                         <div className="missing-image">
