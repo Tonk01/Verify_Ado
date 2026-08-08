@@ -37,7 +37,6 @@ textarea {
   justify-content: center;
   gap: 12px;
 
-  /* Keep the navigation centered independently of the gallery layout. */
   width: max-content;
   max-width: 100%;
   margin: 0 auto 24px;
@@ -98,12 +97,36 @@ textarea {
   min-width: 1160px;
 }
 
+.gallery-toolbar {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+
+  padding-top: 16px;
+  padding-bottom: 20px;
+
+  background:
+    linear-gradient(
+      to bottom,
+      #172554 5%,
+      #172554 100%,
+      rgb(11 17 32 / 0%) 100%
+    );
+} 
+
 /* Page header */
 
 .page-header {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+
   width: min(100%, 1160px);
   max-width: none;
   margin: 0 auto 32px;
+  padding: 12px 0 20px;
+
+  background: #172554;
   text-align: center;
 }
 
@@ -133,7 +156,6 @@ textarea {
 
 .search-input:focus {
   border-color: #3b82f6;
-  box-shadow: 0 0 0 3px rgb(59 130 246 / 20%);
 }
 
 /* Filter sidebar */
@@ -151,7 +173,6 @@ textarea {
   border: 1px solid #334155;
   border-radius: 16px;
   background: #111827;
-  box-shadow: 0 14px 32px rgb(0 0 0 / 25%);
 }
 
 .filter-sidebar-header {
@@ -408,7 +429,6 @@ textarea {
   border: 1px solid #334155;
   border-radius: 16px;
   background: #111827;
-  box-shadow: 0 24px 70px rgb(0 0 0 / 60%);
 }
 
 .modal h2 {
@@ -925,5 +945,81 @@ textarea {
   .focused-navigation {
     width: 40px;
     height: 40px;
+  }
+}
+
+.community-sidebar {
+  position: fixed;
+  top: 30px;
+  right: 32px;
+  z-index: 50;
+
+  width: 240px;
+  max-height: calc(100vh - 110px);
+  padding: 20px;
+  overflow-y: auto;
+
+  border: 1px solid #334155;
+  border-radius: 16px;
+
+  background: #111827;
+  color: #edeff1;
+}
+
+.community-sidebar h2 {
+  margin: 0 0 12px;
+  color: #f8fafc;
+  font-size: 1.2rem;
+}
+
+.community-sidebar p {
+  margin: 0 0 10px;
+  color: #f4f6f8;
+  line-height: 1.7;
+}
+
+.discord-link {
+  display: block;
+  margin-top: 18px;
+  padding: 11px 14px;
+
+  border-radius: 10px;
+  background: #0639a7;
+  color: #ffffff;
+
+  text-align: center;
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.discord-link:hover {
+  background: #484c94;
+}
+
+.contributors {
+  margin-top: 22px;
+  padding-top: 18px;
+  border-top: 1px solid #8c9baf;
+}
+
+.contributors h3 {
+  margin: 0 0 12px;
+  color: #f8fafc;
+  font-size: 0.95rem;
+  text-align: center;
+}
+
+.contributors h4 {
+  text-align: center;
+  color: #f8fafc;
+}
+
+.contributors p {
+  text-align: center;
+}
+
+@media (max-width: 1900px) {
+  .community-sidebar {
+    display: none;
   }
 }

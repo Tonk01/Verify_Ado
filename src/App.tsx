@@ -185,60 +185,60 @@ function App() {
 
   const isAdmin = user?.userRoles.includes("admin") ?? false;
 
-useEffect(() => {
-  async function loadUser() {
-    try {
-      const response = await fetch("/.auth/me", {
-        method: "GET",
-        credentials: "include",
-        cache: "no-store",
-      });
+  useEffect(() => {
+    async function loadUser() {
+      try {
+        const response = await fetch("/.auth/me", {
+          method: "GET",
+          credentials: "include",
+          cache: "no-store",
+        });
 
-      if (!response.ok) {
-        throw new Error(
-          `Authentication request failed: ${response.status}`,
-        );
+        if (!response.ok) {
+          throw new Error(
+            `Authentication request failed: ${response.status}`,
+          );
+        }
+
+        const data = (await response.json()) as AuthResponse;
+
+        console.log("Authentication response:", data);
+
+        setUser(data.clientPrincipal ?? null);
+      } catch (error) {
+        console.error("Unable to load authentication state:", error);
+        setUser(null);
+      } finally {
+        setIsAuthLoading(false);
       }
-
-      const data = (await response.json()) as AuthResponse;
-
-      console.log("Authentication response:", data);
-
-      setUser(data.clientPrincipal ?? null);
-    } catch (error) {
-      console.error("Unable to load authentication state:", error);
-      setUser(null);
-    } finally {
-      setIsAuthLoading(false);
     }
-  }
 
-  void loadUser();
-}, []);
+    void loadUser();
+  }, []);
 
   useEffect(() => {
     if (!selectedImage?.imageURLs.length)
       return;
 
 
-      const urls = selectedImage.imageURLs
-      const total = urls.length
+    const urls = selectedImage.imageURLs
+    const total = urls.length
 
-      const previousIndex = (selectedImageIndex - 1 + total) % total;
+    const previousIndex = (selectedImageIndex - 1 + total) % total;
 
-      const nextIndex = (selectedImageIndex + 1) % total;
+    const nextIndex = (selectedImageIndex + 1) % total;
 
-      const urlsToPreload = [
-        urls[previousIndex],
-        urls[selectedImageIndex],
-        urls[nextIndex],
-      ];
+    const urlsToPreload = [
+      urls[previousIndex],
+      urls[selectedImageIndex],
+      urls[nextIndex],
+    ];
 
-      urlsToPreload.forEach((url) => {
-        const preloadImage = new Image();
-        preloadImage.src = url;
-      });
-    }, [selectedImage, selectedImageIndex]);
+    urlsToPreload.forEach((url) => {
+      const preloadImage = new Image();
+      preloadImage.src = url;
+    });
+  }, [selectedImage, selectedImageIndex]);
 
   useEffect(() => {
     async function loadImages() {
@@ -358,15 +358,15 @@ useEffect(() => {
         .join(" ")
         .toLowerCase();
 
-        const matchesSearch = !search || searchableText.includes(search)
+      const matchesSearch = !search || searchableText.includes(search)
 
       return matchesTag && matchesSearch;
     });
   }, [images, searchTerm, selectedTag]);
 
 
-    // view
-    return (
+  // view
+  return (
     <main className="app">
 
       {page === "admin" && isAdmin ? (
@@ -374,398 +374,417 @@ useEffect(() => {
       ) : (
         <>
 
-        <div className="gallery-layout">
-          <aside className="filter-sidebar">
-            <div className="filter-sidebar-header">
-              <h2>Filter</h2>
+          <div className="gallery-layout">
+            <aside className="filter-sidebar">
+              <div className="filter-sidebar-header">
+                <h2>Filter</h2>
 
-              {selectedTag && (
-                <button type="button" onClick={() => setSelectedTag("")}
-              >
-                Clear
-                </button>
-              )}
-            </div>
+                {selectedTag && (
+                  <button type="button" onClick={() => setSelectedTag("")}
+                  >
+                    Clear
+                  </button>
+                )}
+              </div>
 
-            <div className="filter-sidebar-list">
-              {filterOptions.map((option) => (
-                <button
-                  key={option.tag}
-                  className={`filter-card ${
-                    selectedTag === option.tag ? "active" : ""
-                    }`}
+              <div className="filter-sidebar-list">
+                {filterOptions.map((option) => (
+                  <button
+                    key={option.tag}
+                    className={`filter-card ${selectedTag === option.tag ? "active" : ""
+                      }`}
                     type="button"
                     onClick={() => setSelectedTag(option.tag)}>
-                    
-                    <img 
+
+                    <img
                       src={option.imageURL}
                       alt=""
                     />
 
                     <strong>{option.label}</strong>
-                </button>
-              ))}
-            </div>
-          </aside>
-          
-          <div className="gallery-content">
+                  </button>
+                ))}
+              </div>
+            </aside>
 
-            <nav className="main-navigation">
-              <button
-                type="button"
-                className={page === "gallery" ? "active" : ""}
-                onClick={() => setPage("gallery")}
-              >
-                Gallery
-              </button>
-
-              {isAdmin && (
+            <div className="gallery-content">
+              <nav className="main-navigation">
                 <button
                   type="button"
-                  className={page === "admin" ? "active" : ""}
-                  onClick={() => setPage("admin")}
+                  className={page === "gallery" ? "active" : ""}
+                  onClick={() => setPage("gallery")}
                 >
-                  Admin
+                  Gallery
                 </button>
+
+                {isAdmin && (
+                  <button
+                    type="button"
+                    className={page === "admin" ? "active" : ""}
+                    onClick={() => setPage("admin")}
+                  >
+                    Admin
+                  </button>
+                )}
+
+                {!isAuthLoading && !user && (
+                  <a
+                    className="auth-link"
+                    href="/.auth/login/aad?post_login_redirect_uri=/"
+                  >
+                    Sign in
+                  </a>
+                )}
+
+                {!isAuthLoading && user && (
+                  <a
+                    className="auth-link"
+                    href="/.auth/logout?post_logout_redirect_uri=/"
+                  >
+                    Sign out
+                  </a>
+                )}
+              </nav>
+              <header className="page-header">
+                <p>Search uploaded images</p>
+
+                <input
+                  className="search-input"
+                  type="search"
+                  placeholder="Search..."
+                  value={searchTerm}
+                  onChange={(event) => setSearchTerm(event.target.value)}
+                />
+              </header>
+
+              {isLoading && (
+                <p className="empty-message">
+                  Loading images...
+                </p>
               )}
 
-              {!isAuthLoading && !user && (
-                <a
-                  className="auth-link"
-                  href="/.auth/login/aad?post_login_redirect_uri=/"
-                >
-                  Sign in
-                </a>
+              {error && (
+                <p className="error-message">{error}</p>
               )}
 
-              {!isAuthLoading && user && (
-                <a
-                  className="auth-link"
-                  href="/.auth/logout?post_logout_redirect_uri=/"
-                >
-                  Sign out
-                </a>
-              )}
-            </nav>
-            <header className="page-header">
-              <p>Search uploaded images</p>
+              {!isLoading && !error && (
+                <section className="gallery">
+                  {filteredImages.map((image) => {
+                    const coverImage = image.imageURLs?.[0];
 
-              <input
-                className="search-input"
-                type="search"
-                placeholder="Search..."
-                value={searchTerm}
-                onChange={(event) => setSearchTerm(event.target.value)}
-              />
-            </header>
+                    return (
+                      <button
+                        className="image-card"
+                        key={image.id}
+                        type="button"
+                        onClick={() => openImageViewer(image)}
+                      >
 
-            {isLoading && (
-              <p className="empty-message">
-                Loading images...
-              </p>
-            )}
-
-            {error && (
-              <p className="error-message">{error}</p>
-            )}
-
-            {!isLoading && !error && (
-              <section className="gallery">
-                {filteredImages.map((image) => {
-                  const coverImage = image.imageURLs?.[0];
-
-                  return (
-                    <button
-                      className="image-card"
-                      key={image.id}
-                      type="button"
-                      onClick={() => openImageViewer(image)}
-                    >
-                    
-                      {coverImage ? (
-                        <img
-                          src={coverImage}
-                          alt={image.title}
-                          loading="lazy"
-                          decoding="async"
-                        />
-                      ) : (
-                        <div className="missing-image">
-                          No Image Available
-                        </div>
-                      )}
-
-                      <div className="image-card-content">
-                        <h2>{image.title}</h2>
-                      
-                        {image.description && (
-                          <p>{image.description}</p>
-                        )}
-
-                        {image.imageURLs.length >= 1 && (
-                          <p className="image-count">
-                            {image.imageURLs.length} images
-                          </p>
-                        )}
-
-                        {image.tags.length >= 1 && (
-                          <div className="tag-list">
-                            {image.tags.map((tag) => (
-                              <span
-                                key={`${image.id}-${tag}`}
-                              >
-                                {tag}
-                              </span>
-                            ))}
+                        {coverImage ? (
+                          <img
+                            src={coverImage}
+                            alt={image.title}
+                            loading="lazy"
+                            decoding="async"
+                          />
+                        ) : (
+                          <div className="missing-image">
+                            No Image Available
                           </div>
                         )}
-                      </div>
-                    </button>
-                  );
-                })}
-              </section>
-            )}
 
-            {!isLoading && !error && filteredImages.length === 0 && (
-              <p className="empty-message">
-                No matching images found
-              </p>
-            )}
+                        <div className="image-card-content">
+                          <h2>{image.title}</h2>
+
+                          {image.description && (
+                            <p>{image.description}</p>
+                          )}
+
+                          {image.imageURLs.length >= 1 && (
+                            <p className="image-count">
+                              {image.imageURLs.length} images
+                            </p>
+                          )}
+
+                          {image.tags.length >= 1 && (
+                            <div className="tag-list">
+                              {image.tags.map((tag) => (
+                                <span
+                                  key={`${image.id}-${tag}`}
+                                >
+                                  {tag}
+                                </span>
+                              ))}
+                            </div>
+                          )}
+                        </div>
+                      </button>
+                    );
+                  })}
+                </section>
+              )}
+
+              {!isLoading && !error && filteredImages.length === 0 && (
+                <p className="empty-message">
+                  No matching images found
+                </p>
+              )}
+            </div>
+
+              <aside className="community-sidebar">
+
+                <a className="discord-link"
+                  href="https://discord.gg/CnRXN5y2u"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                > Adocord
+                </a>
+
+                <div className="contributors">
+                  <h3> Special Thanks to </h3>
+                  <p> Jamwolf06 </p>
+                  <p> Dark </p>
+                  <p> Corpses </p>
+                  <p> Jammy Duel </p>
+                  <p> CaptainFroggi </p>
+                  <p> Tasu </p>
+                  <p> Swoo </p>
+                </div>
+
+                <br></br>
+                <h4> For contributing images! </h4>
+              </aside>
           </div>
-        </div>
 
-      {selectedImage && selectedImage.imageURLs.length > 0 && (
-        <>
-          <div
-            className="modal-backdrop"
-            role="presentation"
-            onClick={closeImageViewer}
-          >
-            <div
-              className="modal"
-              role="dialog"
-              aria-modal="true"
-              aria-label={selectedImage.title}
-              onClick={(event) => event.stopPropagation()}
-            >
-              <button
-                className="close-button"
-                type="button"
-                aria-label="Close image viewer"
+          {selectedImage && selectedImage.imageURLs.length > 0 && (
+            <>
+              <div
+                className="modal-backdrop"
+                role="presentation"
                 onClick={closeImageViewer}
               >
-                ×
-              </button>
-
-              <div className="modal-image-wrapper">
-                {selectedImage.imageURLs.length >= 1 && (
+                <div
+                  className="modal"
+                  role="dialog"
+                  aria-modal="true"
+                  aria-label={selectedImage.title}
+                  onClick={(event) => event.stopPropagation()}
+                >
                   <button
-                    className="image-navigation previous"
+                    className="close-button"
                     type="button"
-                    aria-label="Show previous image"
-                    onClick={showPreviousImage}
+                    aria-label="Close image viewer"
+                    onClick={closeImageViewer}
                   >
-                    ‹
+                    ×
                   </button>
-                )}
 
-                <div className="inspection-viewport">
-                  <button
-                    className="inspection-image-button"
-                    type="button"
-                    aria-label="Open focused image viewer"
-                    onClick={openFocusedViewer}
-                  >
-                    <img
-                      className="inspection-image"
-                      src={
-                        selectedImage.imageURLs[
-                          selectedImageIndex
-                        ]
-                      }
-                      alt={`${selectedImage.title} ${
-                        selectedImageIndex + 1
-                      }`}
-                    />
-                  </button>
+                  <div className="modal-image-wrapper">
+                    {selectedImage.imageURLs.length >= 1 && (
+                      <button
+                        className="image-navigation previous"
+                        type="button"
+                        aria-label="Show previous image"
+                        onClick={showPreviousImage}
+                      >
+                        ‹
+                      </button>
+                    )}
+
+                    <div className="inspection-viewport">
+                      <button
+                        className="inspection-image-button"
+                        type="button"
+                        aria-label="Open focused image viewer"
+                        onClick={openFocusedViewer}
+                      >
+                        <img
+                          className="inspection-image"
+                          src={
+                            selectedImage.imageURLs[
+                            selectedImageIndex
+                            ]
+                          }
+                          alt={`${selectedImage.title} ${selectedImageIndex + 1
+                            }`}
+                        />
+                      </button>
+                    </div>
+
+                    {selectedImage.imageURLs.length >= 1 && (
+                      <button
+                        className="image-navigation next"
+                        type="button"
+                        aria-label="Show next image"
+                        onClick={showNextImage}
+                      >
+                        ›
+                      </button>
+                    )}
+                  </div>
+
+                  {selectedImage.imageURLs.length >= 1 && (
+                    <p className="modal-image-counter">
+                      {selectedImageIndex + 1} of{" "}
+                      {selectedImage.imageURLs.length}
+                    </p>
+                  )}
+
+                  <h2>{selectedImage.title}</h2>
+
+                  {selectedImage.description && (
+                    <p>{selectedImage.description}</p>
+                  )}
                 </div>
-
-                {selectedImage.imageURLs.length >= 1 && (
-                  <button
-                    className="image-navigation next"
-                    type="button"
-                    aria-label="Show next image"
-                    onClick={showNextImage}
-                  >
-                    ›
-                  </button>
-                )}
               </div>
 
-              {selectedImage.imageURLs.length >= 1 && (
-                <p className="modal-image-counter">
-                  {selectedImageIndex + 1} of{" "}
-                  {selectedImage.imageURLs.length}
-                </p>
-              )}
-
-              <h2>{selectedImage.title}</h2>
-
-              {selectedImage.description && (
-                <p>{selectedImage.description}</p>
-              )}
-            </div>
-          </div>
-
-          {isLightboxOpen && (
-            <div
-              className="focused-lightbox-backdrop"
-              role="presentation"
-              onClick={closeFocusedViewer}
-            >
-              <div
-                className="focused-lightbox"
-                role="dialog"
-                aria-modal="true"
-                aria-label={`${selectedImage.title} focused viewer`}
-                onClick={(event) => event.stopPropagation()}
-              >
-                <button
-                  className="focused-lightbox-close"
-                  type="button"
-                  aria-label="Close focused image viewer"
+              {isLightboxOpen && (
+                <div
+                  className="focused-lightbox-backdrop"
+                  role="presentation"
                   onClick={closeFocusedViewer}
                 >
-                  ×
-                </button>
-
-                {selectedImage.imageURLs.length >= 1 && (
-                  <aside
-                    className="focused-thumbnails"
-                    aria-label="Image thumbnails"
+                  <div
+                    className="focused-lightbox"
+                    role="dialog"
+                    aria-modal="true"
+                    aria-label={`${selectedImage.title} focused viewer`}
+                    onClick={(event) => event.stopPropagation()}
                   >
-                    {selectedImage.imageURLs.map(
-                      (imageURL, index) => (
-                        <button
-                          key={`${imageURL}-${index}`}
-                          className={
-                            selectedImageIndex === index
-                              ? "focused-thumbnail active"
-                              : "focused-thumbnail"
-                          }
-                          type="button"
-                          aria-label={`Show image ${index + 1}`}
-                          onClick={() => selectImage(index)}
-                        >
-                          <img src={imageURL} alt="" />
-                        </button>
-                      ),
+                    <button
+                      className="focused-lightbox-close"
+                      type="button"
+                      aria-label="Close focused image viewer"
+                      onClick={closeFocusedViewer}
+                    >
+                      ×
+                    </button>
+
+                    {selectedImage.imageURLs.length >= 1 && (
+                      <aside
+                        className="focused-thumbnails"
+                        aria-label="Image thumbnails"
+                      >
+                        {selectedImage.imageURLs.map(
+                          (imageURL, index) => (
+                            <button
+                              key={`${imageURL}-${index}`}
+                              className={
+                                selectedImageIndex === index
+                                  ? "focused-thumbnail active"
+                                  : "focused-thumbnail"
+                              }
+                              type="button"
+                              aria-label={`Show image ${index + 1}`}
+                              onClick={() => selectImage(index)}
+                            >
+                              <img src={imageURL} alt="" />
+                            </button>
+                          ),
+                        )}
+                      </aside>
                     )}
-                  </aside>
-                )}
 
-                <div className={`focused-image-area ${isZoomed ? "zoom-active" : ""}`}
+                    <div className={`focused-image-area ${isZoomed ? "zoom-active" : ""}`}
 
-                  onClick={() => {
-                    if (!isZoomed) {
-                      return;
-                    }
+                      onClick={() => {
+                        if (!isZoomed) {
+                          return;
+                        }
 
-                    setIsZoomed(false);
-                    setZoomPosition({ x: 50, y: 50 })
-                  }}
-
-                    onMouseMove={(event) => {
-                      if (!isZoomed) {
-                        return;
-                      }
-
-                      const bounds = event.currentTarget.getBoundingClientRect();
-
-                      const Px = ((event.clientX - bounds.left) / bounds.width)
-                      const Py = ((event.clientY - bounds.top) / bounds.height)
-
-                      const x =  0 + Px * 100
-                      const y = -6 + Py * 110
-
-                      setZoomPosition({
-                        x: Math.max(0, Math.min(100, x)),
-                        y: Math.max(-6, Math.min(110, y)),
-                      });
-                    }}
-                  >
-
-                  {selectedImage.imageURLs.length >= 1 && (
-                    <button
-                      className="focused-navigation previous"
-                      type="button"
-                      aria-label="Show previous image"
-                      onClick={showPreviousImage}
-                    >
-                      ‹
-                    </button>
-                  )}
-
-                  <button
-                    className={`focused-image-button ${
-                      isZoomed ? "zoomed" : ""
-                    }`}
-                    type="button"
-                    aria-label={
-                      isZoomed
-                        ? "Return image to normal size"
-                        : "Inspect image"
-                    }
-
-                    onClick={(event) => {
-                      event.stopPropagation();
-
-                      if(!isZoomed) {
-                        setIsZoomed(true);
-                      } else {
                         setIsZoomed(false);
-                        setZoomPosition({ x: 50, y: 50 });
-                      }
-                    }}
-                  >
-                    <img
-                      className="focused-main-image"
-                      src={
-                        selectedImage.imageURLs[
-                          selectedImageIndex
-                        ]
-                      }
-                      alt={`${selectedImage.title} ${
-                        selectedImageIndex + 1
-                      }`}
-                      style={{
-                        transformOrigin: `${zoomPosition.x}% ${zoomPosition.y}%`,
+                        setZoomPosition({ x: 50, y: 50 })
                       }}
-                    />
-                  </button>
 
-                  {selectedImage.imageURLs.length >= 1 && (
-                    <button
-                      className="focused-navigation next"
-                      type="button"
-                      aria-label="Show next image"
-                      onClick={showNextImage}
+                      onMouseMove={(event) => {
+                        if (!isZoomed) {
+                          return;
+                        }
+
+                        const bounds = event.currentTarget.getBoundingClientRect();
+
+                        const Px = ((event.clientX - bounds.left) / bounds.width)
+                        const Py = ((event.clientY - bounds.top) / bounds.height)
+
+                        const x = 0 + Px * 100
+                        const y = -6 + Py * 110
+
+                        setZoomPosition({
+                          x: Math.max(0, Math.min(100, x)),
+                          y: Math.max(-6, Math.min(110, y)),
+                        });
+                      }}
                     >
-                      ›
-                    </button>
-                  )}
-                </div>
 
-                <p className="focused-image-counter">
-                  {selectedImageIndex + 1} of{" "}
-                  {selectedImage.imageURLs.length}
-                </p>
-              </div>
-            </div>
+                      {selectedImage.imageURLs.length >= 1 && (
+                        <button
+                          className="focused-navigation previous"
+                          type="button"
+                          aria-label="Show previous image"
+                          onClick={showPreviousImage}
+                        >
+                          ‹
+                        </button>
+                      )}
+
+                      <button
+                        className={`focused-image-button ${isZoomed ? "zoomed" : ""
+                          }`}
+                        type="button"
+                        aria-label={
+                          isZoomed
+                            ? "Return image to normal size"
+                            : "Inspect image"
+                        }
+
+                        onClick={(event) => {
+                          event.stopPropagation();
+
+                          if (!isZoomed) {
+                            setIsZoomed(true);
+                          } else {
+                            setIsZoomed(false);
+                            setZoomPosition({ x: 50, y: 50 });
+                          }
+                        }}
+                      >
+                        <img
+                          className="focused-main-image"
+                          src={
+                            selectedImage.imageURLs[
+                            selectedImageIndex
+                            ]
+                          }
+                          alt={`${selectedImage.title} ${selectedImageIndex + 1
+                            }`}
+                          style={{
+                            transformOrigin: `${zoomPosition.x}% ${zoomPosition.y}%`,
+                          }}
+                        />
+                      </button>
+
+                      {selectedImage.imageURLs.length >= 1 && (
+                        <button
+                          className="focused-navigation next"
+                          type="button"
+                          aria-label="Show next image"
+                          onClick={showNextImage}
+                        >
+                          ›
+                        </button>
+                      )}
+                    </div>
+
+                    <p className="focused-image-counter">
+                      {selectedImageIndex + 1} of{" "}
+                      {selectedImage.imageURLs.length}
+                    </p>
+                  </div>
+                </div>
+              )}
+            </>
           )}
         </>
-      )}
-      </>
       )}
     </main>
   );
