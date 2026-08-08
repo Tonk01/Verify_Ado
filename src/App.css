@@ -947,25 +947,26 @@ textarea {
     height: 40px;
   }
 }
-
 .community-sidebar {
-  position: fixed;
-  top: 30px;
-  right: 32px;
-  z-index: 50;
+  position: absolute;
+  top: 80px;
+
+  left: calc(50% + 790px);
 
   width: 240px;
-  max-height: calc(100vh - 110px);
+  min-width: 240px;
+  max-width: 240px;
+
   padding: 20px;
-  overflow-y: auto;
 
   border: 1px solid #334155;
   border-radius: 16px;
 
   background: #111827;
-  color: #edeff1;
-}
+  color: #cbd5e1;
 
+  box-shadow: 0 14px 32px rgb(0 0 0 / 25%);
+}
 .community-sidebar h2 {
   margin: 0 0 12px;
   color: #f8fafc;
@@ -1016,10 +1017,4 @@ textarea {
 
 .contributors p {
   text-align: center;
-}
-
-@media (max-width: 1900px) {
-  .community-sidebar {
-    display: none;
-  }
 }

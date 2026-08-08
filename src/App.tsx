@@ -126,11 +126,6 @@ const filterOptions: FilterOption[] = [
     imageURL: "/filter_images/Shinzou.jpg",
   },
   {
-    label: "Trading Cards",
-    tag: "Trading Cards",
-    imageURL: "/filter_images/Trading_card.jpg",
-  },
-  {
     label: "Uta",
     tag: "Uta",
     imageURL: "/filter_images/Uta.jpg",
