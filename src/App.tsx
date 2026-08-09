@@ -95,6 +95,11 @@ const filterOptions: FilterOption[] = [
     tag: "Kyougen",
     imageURL: "/filter_images/Kyougen.png",
   },
+   {
+    label: "Lollapalooza",
+    tag: "Lollapalooza",
+    imageURL: "/filter_images/lolla.jpg",
+  },
   {
     label: "Mars",
     tag: "Mars",
@@ -544,6 +549,8 @@ function App() {
                   <p> CaptainFroggi </p>
                   <p> Tasu </p>
                   <p> Swoo </p>
+                  <p> Poi </p>
+                  <p> Chrislime </p>
                 </div>
 
                 <br></br>
