@@ -533,11 +533,16 @@ function App() {
 
               <aside className="community-sidebar">
 
-                <a className="discord-link"
+                <a className="discord-image-link"
                   href="https://discord.gg/CnRXN5y2u"
                   target="_blank"
                   rel="noopener noreferrer"
-                > Adocord
+                  aria-label="Join the discord"
+                > 
+                  <img 
+                  src="/filter_images/svg2.svg"
+                  alt="Join the discord"
+                />
                 </a>
 
                 <div className="contributors">
@@ -551,10 +556,10 @@ function App() {
                   <p> Swoo </p>
                   <p> Poi </p>
                   <p> Chrislime </p>
-                </div>
 
                 <br></br>
-                <h4> For contributing images! </h4>
+                <h3> For contributing images! </h3>
+                </div>
               </aside>
           </div>
 
