@@ -556,6 +556,7 @@ function App() {
                   <p> Swoo </p>
                   <p> Poi </p>
                   <p> Chrislime </p>
+                  <p> Mastalt </p>
 
                 <br></br>
                 <h3> For contributing images! </h3>
