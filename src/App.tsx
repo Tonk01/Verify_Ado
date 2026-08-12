@@ -81,11 +81,6 @@ const filterOptions: FilterOption[] = [
     imageURL: "/filter_images/Ado_hibana.png",
   },
   {
-    label: "DokiDoki",
-    tag: "DokiDoki",
-    imageURL: "/filter_images/DokiDoki.jpg",
-  },
-  {
     label: "Kigeki",
     tag: "Kigeki",
     imageURL: "/filter_images/Kigeki.jpg",
