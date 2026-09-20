@@ -856,15 +856,17 @@ textarea {
     position: static;
     width: 100%;
     min-width: 0;
-    max-height: none;
+    max-height: 420px;
     margin-bottom: 24px;
+    overflow: hidden;
   }
 
   .filter-sidebar-list {
     grid-template-columns:
-      repeat(auto-fit, minmax(120px, 1fr));
-    max-height: none;
-    overflow: visible;
+      repeat(2, minmax(0, 1fr));
+    max-height: 330px;
+    overflow-y: auto;
+    overflow-x: hidden;
   }
 
   .gallery {
@@ -904,6 +906,14 @@ textarea {
   .focused-image-counter {
     grid-column: 1;
     grid-row: 3;
+  }
+
+  .community-sidebar {
+  position: static;
+  width: 100%;
+  min-width: 0;
+  max-width: none;
+  margin-top: 32px;
   }
 }
 
